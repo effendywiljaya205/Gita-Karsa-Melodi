@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Gita Karsa Melodi</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="admin-body">
+
+<!-- ================= LOGIN ================= -->
+<div class="login" id="loginView">
+  <form class="login-card" id="loginForm">
+    <div class="logo"><span class="logo-mark" style="border-color:#000">GKM</span><span class="logo-text">Gita Karsa Melodi</span></div>
+    <h2>Masuk Admin</h2>
+    <p>Kelola pesanan, jadwal, dan lihat laporan.</p>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="pw" placeholder="Password admin" autofocus>
+      <div class="hint">Untuk prototype: <b>admin123</b></div>
+    </div>
+    <button class="btn" style="width:100%">Masuk</button>
+    <p style="margin:16px 0 0;text-align:center"><a href="index.html">← Kembali ke website</a></p>
+  </form>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div class="admin-shell" id="adminView">
+  <nav class="nav" style="position:static">
+    <div class="container">
+      <a href="index.html" class="logo"><span class="logo-mark">GKM</span><span class="logo-text">Gita Karsa Melodi <span style="font-family:var(--sans);font-size:12px;color:#999;font-weight:500">· Admin</span></span></a>
+      <div style="display:flex;gap:8px">
+        <a href="index.html" class="btn btn-ghost-light btn-sm">Lihat Website</a>
+        <button class="btn btn-light btn-sm" id="logoutBtn">Keluar</button>
+      </div>
+    </div>
+  </nav>
+  <div class="tabs" id="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="bookings">Data Pesanan</button>
+    <button data-tab="schedule">Jadwal & Blokir Tanggal</button>
+  </div>
+
+  <main class="admin-main container">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="page active" id="page-dashboard" style="padding:0">
+      <div class="page-head">
+        <div><h2>Dashboard</h2><p id="dashPeriod">Ringkasan seluruh data pesanan.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="yearFilter" class="btn btn-ghost btn-sm" style="padding-right:10px"></select>
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">Cetak Laporan</button>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid-3">
+        <div class="panel">
+          <h3>Pendapatan per bulan</h3>
+          <div class="sub">Nilai pesanan (tidak termasuk yang dibatalkan)</div>
+          <div id="chartMonth"></div>
+        </div>
+        <div class="panel">
+          <h3>Status pesanan</h3>
+          <div class="sub">Jumlah pesanan per status</div>
+          <div id="chartStatus"></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Pesanan per paket</h3>
+          <div class="sub">Jumlah pesanan & total nilai</div>
+          <div id="chartPkg"></div>
+        </div>
+        <div class="panel">
+          <h3>Pesanan per jenis acara</h3>
+          <div class="sub">Jumlah pesanan & total nilai</div>
+          <div id="chartEvent"></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Pesanan per hari</h3>
+          <div class="sub">Hari apa yang paling ramai</div>
+          <div id="chartDow"></div>
+        </div>
+        <div class="panel">
+          <h3>Acara 14 hari ke depan</h3>
+          <div class="sub">Yang perlu disiapkan & ditagih pelunasannya (H-1)</div>
+          <div id="upcomingList"></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Analisis informasi</h3>
+          <div class="sub">Dibuat otomatis dari data</div>
+          <ul class="insights" id="insights"></ul>
+        </div>
+        <div class="panel">
+          <h3>Rekomendasi keputusan</h3>
+          <div class="sub">Saran untuk pemilik usaha</div>
+          <ul class="insights rec" id="recs"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DATA PESANAN ===== -->
+    <section class="page" id="page-bookings" style="padding:0">
+      <div class="page-head">
+        <div><h2>Data Pesanan</h2><p>Konfirmasi DP, tandai lunas, batalkan, atau hapus pesanan.</p></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" id="exportBtn">Export ke Excel (CSV)</button>
+          <button class="btn btn-ghost btn-sm" id="resetBtn">Reset data contoh</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="Cari nama, kode, atau no. HP">
+        <select id="statusFilter">
+          <option value="">Semua status</option>
+          <option value="pending">Menunggu DP</option>
+          <option value="confirmed">DP Diterima</option>
+          <option value="lunas">Lunas</option>
+          <option value="cancelled">Dibatalkan</option>
+        </select>
+        <select id="timeFilter">
+          <option value="upcoming">Akan datang</option>
+          <option value="past">Sudah lewat</option>
+          <option value="">Semua tanggal</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kode</th><th>Tanggal acara</th><th>Penyewa</th><th>Acara</th><th>Paket</th><th>Total / DP</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="bookingRows"></tbody>
+        </table>
+      </div>
+      <p class="muted" style="color:#888;font-size:13px;margin-top:10px" id="rowCount"></p>
+    </section>
+
+    <!-- ===== JADWAL ===== -->
+    <section class="page" id="page-schedule" style="padding:0">
+      <div class="page-head">
+        <div><h2>Jadwal & Blokir Tanggal</h2><p>Klik tanggal untuk melihat detail atau menutup tanggal (misal alat servis / tim libur).</p></div>
+      </div>
+      <div class="cal-wrap">
+        <div class="cal" id="adminCal"></div>
+        <div>
+          <div class="panel day-panel" id="dayPanel"><h3>Pilih tanggal</h3><p style="color:#777">Klik salah satu tanggal di kalender.</p></div>
+          <div class="panel" style="margin-top:14px">
+            <h3>Tanggal yang ditutup</h3>
+            <ul class="block-list" id="blockList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="assets/data.js"></script>
+<script src="assets/calendar.js"></script>
+<script src="assets/admin.js"></script>
+</body>
+</html>

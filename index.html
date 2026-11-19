@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gita Karsa Melodi — Sewa Sound System Pontianak</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="nav">
+  <div class="container">
+    <a href="#top" class="logo">
+      <span class="logo-mark">GKM</span>
+      <span class="logo-text">Gita Karsa Melodi</span>
+    </a>
+    <div class="nav-links">
+      <a href="#tentang">Tentang</a>
+      <a href="#paket">Paket</a>
+      <a href="#jadwal">Jadwal</a>
+      <a href="#ketentuan">Ketentuan</a>
+      <a href="admin.html">Admin</a>
+      <a href="#pesan" class="btn btn-light btn-sm">Pesan Sekarang</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="container">
+    <div class="eyebrow">Sound System Rental · Pontianak</div>
+    <h1>Suara jernih untuk setiap momen penting Anda.</h1>
+    <p>Sewa sound system lengkap dengan mixer dan sound man berpengalaman. Cek jadwal kosong, pilih paket, dan pesan langsung dari website.</p>
+    <div class="actions">
+      <a href="#pesan" class="btn btn-light">Pesan Sekarang</a>
+      <a href="#jadwal" class="btn btn-ghost-light">Cek Tanggal Kosong</a>
+    </div>
+    <div class="hero-stats">
+      <div><b>5</b><span>Pilihan paket</span></div>
+      <div><b>1000–4000W</b><span>Daya sound</span></div>
+      <div><b>Sound man</b><span>Termasuk di semua paket</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= TENTANG ================= -->
+<section id="tentang">
+  <div class="container about-grid">
+    <div>
+      <div class="section-head">
+        <div class="eyebrow">Tentang Kami</div>
+        <h2>Partner audio untuk acara di Pontianak dan sekitarnya.</h2>
+      </div>
+      <p><b>Gita Karsa Melodi</b> adalah usaha penyewaan sound system di Pontianak yang melayani berbagai acara, dari pernikahan, lamaran, dan syukuran sampai seminar, wisuda, dan karaoke.</p>
+      <p>Setiap paket sudah termasuk mixer dan sound man, jadi Anda tidak perlu repot memasang atau mengatur suara. Kami juga menyediakan MC dan pemain musik sebagai layanan tambahan.</p>
+    </div>
+    <div class="values">
+      <div class="value"><b>Kru selalu ikut</b><span>Alat dipasang dan dioperasikan oleh tim kami.</span></div>
+      <div class="value"><b>Harga jelas</b><span>Total biaya dan DP langsung terlihat saat memesan.</span></div>
+      <div class="value"><b>Jadwal transparan</b><span>Tanggal yang sudah terisi terlihat di kalender.</span></div>
+      <div class="value"><b>Ada struk resmi</b><span>Setiap penyewa mendapat bukti pemesanan.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= JENIS ACARA ================= -->
+<section class="section-dark">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Jenis Acara</div>
+      <h2>Acara apa pun, suaranya kami yang urus.</h2>
+    </div>
+    <div class="events">
+      <div class="event"><div class="ic">💍</div><b>Wedding</b><span>Resepsi & akad nikah</span></div>
+      <div class="event"><div class="ic">💐</div><b>Lamaran</b><span>Acara keluarga & tunangan</span></div>
+      <div class="event"><div class="ic">🙏</div><b>Syukuran</b><span>Selamatan & doa bersama</span></div>
+      <div class="event"><div class="ic">🎤</div><b>Seminar</b><span>Kantor, kampus, komunitas</span></div>
+      <div class="event"><div class="ic">🎂</div><b>Birthday</b><span>Ulang tahun & pesta</span></div>
+      <div class="event"><div class="ic">🎓</div><b>Graduation</b><span>Wisuda & perpisahan</span></div>
+      <div class="event"><div class="ic">🎶</div><b>Karaoke</b><span>Hiburan & gathering</span></div>
+      <div class="event"><div class="ic">✨</div><b>Lainnya</b><span>Hubungi kami untuk diskusi</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PAKET ================= -->
+<section id="paket" class="section-soft">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Paket Sewa</div>
+      <h2>Pilih paket sesuai besar acara Anda.</h2>
+      <p>Semua paket sudah termasuk mixer dan sound man.</p>
+    </div>
+    <div class="packages" id="packageList"></div>
+    <div class="addons">
+      <div class="addon"><div><b>MC / Pemain Musik</b><br><span>Per orang</span></div><b>Rp600.000</b></div>
+      <div class="addon"><div><b>Overtime</b><br><span>Per jam tambahan</span></div><b>Rp150.000</b></div>
+      <div class="addon"><div><b>Luar Kota</b><br><span>Biaya transport & akomodasi</span></div><b>Nego</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= JADWAL ================= -->
+<section id="jadwal" class="section-dark">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Jadwal Ketersediaan</div>
+      <h2>Cek tanggal yang masih kosong.</h2>
+      <p>Klik tanggal yang tersedia untuk langsung mengisi form pemesanan.</p>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal" id="calendar"></div>
+      <div class="cal-side">
+        <h4>Ringkasan bulan ini</h4>
+        <p id="monthSummary">—</p>
+        <ul class="upcoming" id="freeWeekends"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FORM PEMESANAN ================= -->
+<section id="pesan">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Form Pemesanan</div>
+      <h2>Pesan sound system Anda.</h2>
+      <p>Isi data di bawah. Total biaya dan DP 50% dihitung otomatis.</p>
+    </div>
+    <div class="order-grid">
+      <form class="form-card" id="orderForm" novalidate>
+        <div class="form-row">
+          <div class="field" data-f="name">
+            <label>Nama lengkap</label>
+            <input type="text" id="fName" placeholder="cth. Rina Wulandari">
+            <div class="err">Nama wajib diisi.</div>
+          </div>
+          <div class="field" data-f="phone">
+            <label>No. WhatsApp</label>
+            <input type="tel" id="fPhone" placeholder="08xxxxxxxxxx">
+            <div class="err">Masukkan nomor HP yang valid (10–13 digit).</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" data-f="event">
+            <label>Jenis acara</label>
+            <select id="fEvent"></select>
+            <div class="err">Pilih jenis acara.</div>
+          </div>
+          <div class="field" data-f="date">
+            <label>Tanggal acara</label>
+            <input type="date" id="fDate">
+            <div class="hint" id="dateHint">Pilih tanggal, atau klik di kalender.</div>
+            <div class="err" id="dateErr">Tanggal tidak tersedia.</div>
+          </div>
+        </div>
+        <div class="field" data-f="address">
+          <label>Alamat lokasi acara</label>
+          <textarea id="fAddress" rows="2" placeholder="Nama jalan, nomor, kelurahan, kota"></textarea>
+          <div class="err">Alamat wajib diisi.</div>
+        </div>
+        <div class="field" data-f="pkg">
+          <label>Paket</label>
+          <select id="fPkg"></select>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>MC / Pemain musik <em>(Rp600rb/orang)</em></label>
+            <div class="stepper"><button type="button" data-step="fAddon" data-d="-1">−</button><input type="number" id="fAddon" value="0" min="0" max="10"><button type="button" data-step="fAddon" data-d="1">+</button></div>
+          </div>
+          <div class="field">
+            <label>Overtime <em>(Rp150rb/jam)</em></label>
+            <div class="stepper"><button type="button" data-step="fOvertime" data-d="-1">−</button><input type="number" id="fOvertime" value="0" min="0" max="12"><button type="button" data-step="fOvertime" data-d="1">+</button></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Metode pembayaran</label>
+            <select id="fPayment"><option>Transfer BCA</option><option>Cash</option></select>
+          </div>
+          <div class="field">
+            <label>Catatan <em>(opsional)</em></label>
+            <input type="text" id="fNotes" placeholder="cth. acara outdoor, mulai jam 10">
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="fAgree"> <span>Saya sudah membaca <a href="#ketentuan">ketentuan sewa</a>, termasuk DP 50% hangus jika acara dibatalkan dan pelunasan paling lambat H-1.</span></label>
+        <button type="submit" class="btn" id="submitBtn" style="width:100%">Kirim Pesanan</button>
+      </form>
+
+      <aside class="summary">
+        <h4>Ringkasan Biaya</h4>
+        <div class="sum-line"><span>Paket</span><span id="sPkg">—</span></div>
+        <div class="sum-line"><span>Tanggal</span><span id="sDate">—</span></div>
+        <div class="sum-line"><span>MC / Musisi</span><span id="sAddon">Rp0</span></div>
+        <div class="sum-line"><span>Overtime</span><span id="sOt">Rp0</span></div>
+        <div class="sum-total"><span>Total</span><span id="sTotal">Rp0</span></div>
+        <div class="sum-dp"><span>DP 50%</span><span id="sDp">Rp0</span></div>
+        <p class="sum-note">Sisa pembayaran dilunasi paling lambat H-1. Acara di luar kota dikenakan biaya transport & akomodasi. Genset tidak termasuk.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KETENTUAN ================= -->
+<section id="ketentuan" class="section-dark">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Ketentuan Sewa</div>
+      <h2>Supaya acara berjalan lancar.</h2>
+    </div>
+    <div class="terms">
+      <div class="term"><div class="num">01</div><b>Wajib dengan kru</b><span>Alat tidak disewakan tanpa sound man dari tim kami.</span></div>
+      <div class="term"><div class="num">02</div><b>DP 50%</b><span>Booking tanggal dengan DP 50%. DP hangus jika acara dibatalkan.</span></div>
+      <div class="term"><div class="num">03</div><b>Pelunasan H-1</b><span>Sisa pembayaran dilunasi paling lambat satu hari sebelum acara.</span></div>
+      <div class="term"><div class="num">04</div><b>Reschedule</b><span>Perubahan tanggal paling lambat 1 minggu sebelum acara.</span></div>
+      <div class="term"><div class="num">05</div><b>Overtime</b><span>Tambahan waktu dikenakan Rp150.000 per jam.</span></div>
+      <div class="term"><div class="num">06</div><b>Pembayaran</b><span>Cash atau transfer BCA. Kirim bukti transfer ke admin. Penyewa mendapat struk.</span></div>
+      <div class="term"><div class="num">07</div><b>Luar kota</b><span>Dikenakan biaya transportasi dan akomodasi tambahan.</span></div>
+      <div class="term"><div class="num">08</div><b>Genset</b><span>Genset tidak termasuk dalam paket sewa.</span></div>
+      <div class="term"><div class="num">09</div><b>Konfirmasi</b><span>Pesanan dikonfirmasi admin setelah bukti DP diterima.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="logo"><span class="logo-mark" style="border-color:#fff;color:#fff">GKM</span><span class="logo-text">Gita Karsa Melodi</span></div>
+        <p style="margin-top:12px;max-width:320px">Sewa sound system untuk wedding, seminar, syukuran, dan acara lainnya di Pontianak.</p>
+      </div>
+      <div>
+        <h5>Hubungi Kami</h5>
+        <p>Bello · <a href="https://wa.me/6289531573288" target="_blank">0895-3157-3288</a></p>
+        <p>Vedro · <a href="https://wa.me/6281237757534" target="_blank">0812-3775-7534</a></p>
+      </div>
+      <div>
+        <h5>Sosial Media</h5>
+        <p>Instagram · @gitakarsamelodi</p>
+        <p>Email · gitakarsamelodi@gmail.com</p>
+      </div>
+    </div>
+    <div class="copy"><span>© 2026 Gita Karsa Melodi · Pontianak</span><span>Prototype Sistem Informasi Manajemen</span></div>
+  </div>
+</footer>
+
+<!-- ================= MODAL STRUK ================= -->
+<div class="modal-bg" id="receiptModal">
+  <div class="modal" id="receipt"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/calendar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
