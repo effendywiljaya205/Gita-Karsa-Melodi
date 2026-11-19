@@ -1,0 +1,33 @@
+CARA BUKA WEBSITE GITA KARSA MELODI (prototype)
+================================================
+
+Cara paling gampang (tanpa install apa-apa):
+1. Download/copy seluruh folder "gkm-website" ke laptop.
+2. Klik 2x file "index.html" -> terbuka di Chrome/Edge.
+3. Halaman admin: klik menu "Admin" di kanan atas (atau buka admin.html).
+   Password: admin123
+
+Kalau mau tampil sebagai "localhost" (opsional, butuh Python):
+1. Buka Terminal / Command Prompt di dalam folder gkm-website
+2. Ketik:  python -m http.server 8000
+3. Buka browser ke  http://localhost:8000
+
+Catatan:
+- Data tersimpan di browser (localStorage). Pesanan baru langsung muncul di admin.
+- Mau mulai dari data contoh lagi: Admin > Data Pesanan > "Reset data contoh".
+- Nomor rekening BCA di struk masih CONTOH (123-456-7890).
+
+Isi folder:
+- index.html        : website untuk pelanggan (profil, paket, kalender, form pesan)
+- admin.html        : halaman admin (dashboard, data pesanan, blokir tanggal)
+- assets/data.js    : data paket, harga, dan data contoh pesanan
+- assets/app.js     : logika halaman pelanggan
+- assets/admin.js   : logika halaman admin & dashboard
+- assets/calendar.js: kalender ketersediaan
+- assets/style.css  : tampilan (warna, font, layout)
+
+DATABASE ONLINE (Supabase)
+- Isi SUPABASE_URL dan SUPABASE_KEY di assets/config.js supaya pesanan dari HP/laptop mana pun masuk ke admin yang sama.
+- Tabel dibuat dengan menjalankan supabase-setup.sql di Supabase > SQL Editor.
+- Di halaman admin, di sebelah logo ada tulisan "● Online" (pakai Supabase) atau "● Mode lokal" (config.js kosong).
+- Admin otomatis cek pesanan baru tiap 15 detik.

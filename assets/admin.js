@@ -9,7 +9,23 @@ function toast(msg) {
 
 /* ---------- login sederhana (prototype) ---------- */
 function isLoggedIn() { try { return sessionStorage.getItem('gkm_admin') === '1'; } catch (e) { return false; } }
-function showAdmin() { $('loginView').style.display = 'none'; $('adminView').classList.add('show'); renderAll(); }
+function showAdmin() {
+  $('loginView').style.display = 'none'; $('adminView').classList.add('show');
+  $('dbStatus').textContent = CLOUD ? '● Online' : '● Mode lokal';
+  $('dbStatus').title = CLOUD ? 'Data tersimpan di database online (Supabase)' : 'Data hanya tersimpan di browser ini';
+  $('dbStatus').style.color = CLOUD ? '#5fd38d' : '#e0b45a';
+  renderAll();
+  dbReady().then(() => {
+    renderAll();
+    if (dbError) { $('dbStatus').textContent = '● Gagal terhubung'; $('dbStatus').style.color = '#ff7b6b'; $('dbStatus').title = dbError; }
+  });
+  if (CLOUD) {
+    // cek pesanan baru tiap 15 detik & saat tab dibuka lagi
+    const tick = () => refreshData().then(ch => { if (ch) { renderAll(); if (pickedDate) renderDayPanel(); } }).catch(() => {});
+    setInterval(tick, 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+  }
+}
 $('loginForm').addEventListener('submit', e => {
   e.preventDefault();
   if ($('pw').value === GKM.ADMIN_PASSWORD) {
@@ -229,9 +245,10 @@ $('exportBtn').addEventListener('click', () => {
 $('resetBtn').addEventListener('click', e => {
   const btn = e.currentTarget;
   if (btn.dataset.sure !== '1') { btn.dataset.sure = '1'; btn.textContent = 'Klik lagi untuk reset'; return; }
-  resetData(); loadBookings(); loadBlocked();
-  btn.dataset.sure = ''; btn.textContent = 'Reset data contoh';
-  renderAll(); toast('Data dikembalikan ke data contoh.');
+  btn.disabled = true; btn.textContent = 'Mereset...';
+  resetData().then(() => { renderAll(); toast('Data dikembalikan ke data contoh.'); })
+    .catch(err => { console.error(err); toast('Reset gagal, cek koneksi.'); })
+    .finally(() => { btn.disabled = false; btn.dataset.sure = ''; btn.textContent = 'Reset data contoh'; });
 });
 
 /* =================== JADWAL & BLOKIR =================== */

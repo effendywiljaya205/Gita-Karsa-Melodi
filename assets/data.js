@@ -57,40 +57,158 @@ function calcPrice({ pkg, addon = 0, overtime = 0 }) {
   return { base, addonTotal, otTotal, total, dp: total * GKM.DP_RATE };
 }
 
-/* ---------- storage ---------- */
-const KEY_BOOKINGS = 'gkm_bookings_v1';
-const KEY_BLOCKED = 'gkm_blocked_v1';
+/* ---------- storage ----------
+   Mode ONLINE  : config.js terisi -> data di Supabase (semua HP/laptop lihat data yang sama).
+                  Salinan disimpan di memori/localStorage supaya tampilan cepat.
+   Mode LOKAL   : config.js kosong -> data hanya di browser ini.
+-------------------------------------------------------- */
+const CLOUD = typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL && typeof SUPABASE_KEY !== 'undefined' && SUPABASE_KEY;
+const KEY_BOOKINGS = CLOUD ? 'gkm_cloud_bookings' : 'gkm_bookings_v1';
+const KEY_BLOCKED = CLOUD ? 'gkm_cloud_blocked' : 'gkm_blocked_v1';
+
+let _bookings = null, _blocked = null;          // salinan data saat ini
+let _syncedBookings = {}, _syncedBlocked = {};  // kondisi terakhir yang sama dengan server
+
+function _readLocal(key) { try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function _writeLocal(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
 
 function loadBookings() {
-  try {
-    const raw = localStorage.getItem(KEY_BOOKINGS);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  const seed = seedBookings();
-  saveBookings(seed);
-  return seed;
+  if (!_bookings) {
+    _bookings = _readLocal(KEY_BOOKINGS);
+    if (!_bookings) { _bookings = CLOUD ? [] : seedBookings(); _writeLocal(KEY_BOOKINGS, _bookings); }
+  }
+  return _bookings.map(b => ({ ...b }));
 }
 function saveBookings(list) {
-  try { localStorage.setItem(KEY_BOOKINGS, JSON.stringify(list)); } catch (e) {}
+  _bookings = list.map(b => ({ ...b }));
+  _writeLocal(KEY_BOOKINGS, _bookings);
+  if (CLOUD) return _pushBookings();
+  return Promise.resolve();
 }
 function loadBlocked() {
-  try {
-    const raw = localStorage.getItem(KEY_BLOCKED);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  const seed = seedBlocked();
-  saveBlocked(seed);
-  return seed;
+  if (!_blocked) {
+    _blocked = _readLocal(KEY_BLOCKED);
+    if (!_blocked) { _blocked = CLOUD ? [] : seedBlocked(); _writeLocal(KEY_BLOCKED, _blocked); }
+  }
+  return _blocked.map(b => ({ ...b }));
 }
 function saveBlocked(list) {
-  try { localStorage.setItem(KEY_BLOCKED, JSON.stringify(list)); } catch (e) {}
-}
-function resetData() {
-  try { localStorage.removeItem(KEY_BOOKINGS); localStorage.removeItem(KEY_BLOCKED); } catch (e) {}
+  _blocked = list.map(b => ({ ...b }));
+  _writeLocal(KEY_BLOCKED, _blocked);
+  if (CLOUD) return _pushBlocked();
+  return Promise.resolve();
 }
 function newId(list) {
-  const max = list.reduce((m, b) => Math.max(m, parseInt(b.id.replace('GKM-', ''), 10) || 0), 0);
+  const max = list.reduce((m, b) => Math.max(m, parseInt(String(b.id).replace('GKM-', ''), 10) || 0), 0);
   return 'GKM-' + String(max + 1).padStart(4, '0');
+}
+
+/* ----- Supabase (lewat REST API, tanpa library tambahan) ----- */
+function _api(path, opts = {}) {
+  const headers = { apikey: SUPABASE_KEY, 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (String(SUPABASE_KEY).startsWith('eyJ')) headers.Authorization = 'Bearer ' + SUPABASE_KEY;
+  return fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/' + path, { ...opts, headers }).then(async r => {
+    if (!r.ok) { const t = await r.text(); const err = new Error(t || r.statusText); err.status = r.status; err.body = t; throw err; }
+    return r.status === 204 ? null : r.json().catch(() => null);
+  });
+}
+const _toRow = b => ({ id: b.id, name: b.name, phone: b.phone, event: b.event, event_date: b.date, address: b.address,
+  package: b.pkg, addon: b.addon, overtime: b.overtime, payment: b.payment, notes: b.notes || '',
+  total: b.total, dp: b.dp, status: b.status, dp_paid: !!b.dpPaid, created_at: b.createdAt });
+const _fromRow = r => ({ id: r.id, name: r.name, phone: r.phone, event: r.event, date: r.event_date, address: r.address,
+  pkg: r.package, addon: r.addon, overtime: r.overtime, payment: r.payment, notes: r.notes || '',
+  total: Number(r.total), dp: Number(r.dp), status: r.status, dpPaid: r.dp_paid, createdAt: r.created_at });
+const _snap = (list, key) => Object.fromEntries(list.map(x => [x[key], JSON.stringify(x)]));
+
+let _pushChain = Promise.resolve();
+function _pushBookings() {
+  _pushChain = _pushChain.then(async () => {
+    const cur = _snap(_bookings, 'id');
+    const prev = _syncedBookings;
+    const toDelete = Object.keys(prev).filter(id => !(id in cur));
+    const toInsert = _bookings.filter(b => !(b.id in prev));
+    const toUpdate = _bookings.filter(b => b.id in prev && prev[b.id] !== cur[b.id]);
+    for (const id of toDelete) await _api('bookings?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+    if (toInsert.length) await _api('bookings', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(toInsert.map(_toRow)) });
+    for (const b of toUpdate) await _api('bookings?id=eq.' + encodeURIComponent(b.id), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(_toRow(b)) });
+    _syncedBookings = cur;
+  }).catch(e => { _syncError(e); throw e; });
+  return _pushChain;
+}
+let _pushBlockChain = Promise.resolve();
+function _pushBlocked() {
+  _pushBlockChain = _pushBlockChain.then(async () => {
+    const cur = _snap(_blocked, 'date');
+    const prev = _syncedBlocked;
+    for (const d of Object.keys(prev).filter(d => !(d in cur))) await _api('blocked_dates?block_date=eq.' + d, { method: 'DELETE' });
+    const changed = _blocked.filter(b => prev[b.date] !== cur[b.date]);
+    if (changed.length) await _api('blocked_dates', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(changed.map(b => ({ block_date: b.date, reason: b.reason }))) });
+    _syncedBlocked = cur;
+  }).catch(e => { _syncError(e); throw e; });
+  return _pushBlockChain;
+}
+function _syncError(e) {
+  console.error('Gagal sinkron ke Supabase:', e);
+  if (typeof toast === 'function') toast('Gagal menyimpan ke database online. Cek koneksi internet.');
+}
+
+/* Ambil data terbaru dari server. Dipanggil saat halaman dibuka & berkala. */
+async function refreshData() {
+  if (!CLOUD) return false;
+  await _pushChain.catch(() => {}); await _pushBlockChain.catch(() => {});
+  const [rows, blk] = await Promise.all([
+    _api('bookings?select=*&order=event_date.asc'),
+    _api('blocked_dates?select=*&order=block_date.asc'),
+  ]);
+  const bookings = rows.map(_fromRow);
+  const blocked = blk.map(r => ({ date: r.block_date, reason: r.reason || '' }));
+  const changed = JSON.stringify(bookings) !== JSON.stringify(_bookings) || JSON.stringify(blocked) !== JSON.stringify(_blocked);
+  _bookings = bookings; _blocked = blocked;
+  _syncedBookings = _snap(bookings, 'id'); _syncedBlocked = _snap(blocked, 'date');
+  _writeLocal(KEY_BOOKINGS, bookings); _writeLocal(KEY_BLOCKED, blocked);
+  return changed;
+}
+
+/* Siap dipakai: di mode online, tunggu data pertama dari server. Kalau database masih kosong, isi data contoh. */
+let _readyPromise = null;
+let dbError = '';   // pesan kalau gagal terhubung (ditampilkan di admin)
+function dbReady() {
+  if (_readyPromise) return _readyPromise;
+  _readyPromise = (async () => {
+    if (!CLOUD) return;
+    try {
+      await refreshData();
+      if (!_bookings.length && !_blocked.length) await _seedCloud();
+    } catch (e) {
+      console.error(e);
+      const body = String(e.body || e.message || '');
+      dbError = (e.status === 404 || /PGRST205|does not exist|schema cache/i.test(body))
+        ? 'Tabel belum dibuat. Jalankan supabase-setup.sql di Supabase > SQL Editor.'
+        : (e.status === 401 || /api key/i.test(body)) ? 'Key Supabase salah. Cek assets/config.js.'
+        : 'Tidak bisa terhubung ke database online. Cek internet.';
+      if (typeof toast === 'function') toast(dbError);
+    }
+  })();
+  return _readyPromise;
+}
+async function _seedCloud() {
+  _bookings = seedBookings();
+  await saveBookings(_bookings);
+  _blocked = seedBlocked();
+  await saveBlocked(_blocked);
+}
+async function resetData() {
+  if (CLOUD) {
+    await _api('bookings?id=neq.__none__', { method: 'DELETE' });
+    await _api('blocked_dates?reason=neq.__none__', { method: 'DELETE' });
+    await _api('blocked_dates?reason=is.null', { method: 'DELETE' });
+    _syncedBookings = {}; _syncedBlocked = {};
+    await _seedCloud();
+  } else {
+    try { localStorage.removeItem(KEY_BOOKINGS); localStorage.removeItem(KEY_BLOCKED); } catch (e) {}
+    _bookings = null; _blocked = null;
+  }
 }
 
 /* Uang yang sudah benar-benar diterima dari satu pesanan */

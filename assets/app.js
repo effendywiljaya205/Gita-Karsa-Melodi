@@ -66,6 +66,7 @@ cal.onRender = ({ year, month, bookings, blocked }) => {
     : '<li>Akhir pekan bulan ini sudah penuh.</li>';
 };
 cal.render();
+dbReady().then(() => cal.render());
 
 /* ---------- ringkasan biaya ---------- */
 function formData() {
@@ -119,29 +120,50 @@ function validateDate() {
 }
 $('fDate').addEventListener('change', () => { validateDate(); if ($('fDate').value) cal.select($('fDate').value); });
 
-$('orderForm').addEventListener('submit', e => {
+$('orderForm').addEventListener('submit', async e => {
   e.preventDefault();
   const f = formData();
   let ok = true;
   ok = setInvalid('name', !f.name) && ok;
   ok = setInvalid('phone', !/^0\d{9,12}$/.test(f.phone)) && ok;
   ok = setInvalid('event', !f.event) && ok;
-  ok = validateDate() && ok;
   ok = setInvalid('address', !f.address) && ok;
+  if (!$('fDate').value) ok = validateDate() && ok;
   if (!ok) return toast('Masih ada data yang belum benar.');
   if (!$('fAgree').checked) return toast('Centang persetujuan ketentuan sewa dulu ya.');
 
-  const list = loadBookings();
-  const pr = calcPrice(f);
-  const booking = { id: newId(list), ...f, total: pr.total, dp: pr.dp, status: 'pending', createdAt: todayISO() };
-  list.push(booking);
-  saveBookings(list);
-  showReceipt(booking);
-  $('orderForm').reset();
-  $('fPkg').value = 'P3';
-  $('dateHint').textContent = 'Pilih tanggal, atau klik di kalender.';
-  updateSummary();
-  cal.select(null);
+  const btn = $('submitBtn');
+  btn.disabled = true; btn.textContent = 'Mengirim pesanan...';
+  try {
+    // ambil data terbaru dulu supaya tanggal tidak bentrok dengan pesanan orang lain
+    if (CLOUD) { await refreshData(); cal.render(); }
+    if (!validateDate()) { toast('Tanggal ini baru saja terisi, pilih tanggal lain.'); return; }
+    const pr = calcPrice(f);
+    let booking, tries = 0;
+    while (true) {
+      const list = loadBookings();
+      booking = { id: newId(list), ...f, total: pr.total, dp: pr.dp, status: 'pending', dpPaid: false, createdAt: todayISO() };
+      list.push(booking);
+      try { await saveBookings(list); break; }
+      catch (err) {
+        // kode pesanan dipakai orang lain di detik yang sama -> ambil ulang & coba lagi
+        if (err.status === 409 && tries++ < 3) { await refreshData(); continue; }
+        throw err;
+      }
+    }
+    showReceipt(booking);
+    $('orderForm').reset();
+    $('fPkg').value = 'P3';
+    $('dateHint').textContent = 'Pilih tanggal, atau klik di kalender.';
+    updateSummary();
+    cal.select(null);
+  } catch (err) {
+    console.error(err);
+    if (CLOUD) await refreshData().catch(() => {});
+    toast('Pesanan gagal terkirim. Cek internet lalu coba lagi.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Kirim Pesanan';
+  }
 });
 
 /* ---------- struk / bukti pemesanan ---------- */
